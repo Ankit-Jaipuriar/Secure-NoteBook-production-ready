@@ -264,34 +264,81 @@ app.get("/api/users", authenticate, async (req, res) => {
 });
 
 // Share file route
-app.post("/api/shareFile", authenticate, async (req, res) => {
+app.post('/api/shareFile', async (req, res) => {
+  const { fileId, email } = req.body;
+
   try {
-    const { fileId, shareWithUserId } = req.body;
+    // Find the user by email
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    // Find the file by ID
+    // Find the file
     const file = await userFile.findById(fileId);
-
     if (!file) {
       return res.status(404).json({ message: "File not found" });
     }
 
-    // Check if the authenticated user is the owner of the file
-    if (file.userId.toString() !== req.userId) {
-      return res.status(403).json({ message: "You do not have permission to share this file" });
+    // Add user ID to the sharedWith array if not already shared
+    if (!file.sharedWith.includes(user._id)) {
+      file.sharedWith.push(user._id);
+      await file.save();
     }
 
-    // Add the user ID to the sharedWith array
-    file.sharedWith.push(shareWithUserId);
+    // Add the fileId to the user's sharedFiles array if not already present
+    if (!user.sharedFiles.includes(fileId)) {
+      user.sharedFiles.push(fileId);
+      await user.save();
+    }
 
-    // Save the updated file
-    await file.save();
-
-    res.status(200).json({ message: "File shared successfully" });
+    res.status(200).json({ success: true, message: "File shared successfully" });
   } catch (error) {
     console.error("Error sharing file:", error);
-    res.status(500).json({ error: "Error sharing file" });
+    res.status(500).json({ message: "Server error" });
   }
 });
+
+
+// Route to fetch shared files for the authenticated user
+app.get('/api/shared-files', authenticate, async (req, res) => {
+  try {
+    // Fetch the authenticated user by userId (ensure userId is part of req.userId)
+    const user = await userModel.findById(req.userId).populate('sharedFiles');
+
+    // If the user is not found or there are no shared files
+    if (!user || !user.sharedFiles || user.sharedFiles.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Send the shared files with encryption status
+    const filesWithStatus = user.sharedFiles.map(file => ({
+      ...file.toObject(),
+      // encrypted: file.encryption || false, // Default to false if encryption field is missing
+    }));
+
+    res.status(200).json(filesWithStatus);
+  } catch (error) {
+    console.error("Error fetching shared files:", error);
+    res.status(500).json({ error: "Error fetching shared files" });
+  }
+});
+
+
+app.delete('/api/files/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    // Delete file logic, e.g., from a database
+    const result = await userFile.findByIdAndDelete(fileId);
+    if (!result) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    res.status(200).json({ message: "File deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred while deleting the file" });
+  }
+});
+
 
 
 

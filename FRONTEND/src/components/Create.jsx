@@ -18,6 +18,7 @@ const Create = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if title and content are provided
     if (!title || !content) {
       setMessage("Title and Content are required.");
       return;
@@ -32,10 +33,23 @@ const Create = () => {
     };
 
     try {
+      // Send file data to backend
       const response = await axios.post("/api/upload", fileData);
-      setMessage(response.data.message || "Uploaded Successfully");
+
+      // Capture the fileId and message from the response
+      const { fileId, message } = response.data;
+      
+      if (fileId) {
+        // Optionally, update the user's createdFiles array here, or let the backend handle it.
+        // Example: You could update the user's UI to include the new file.
+        console.log("File uploaded with ID:", fileId);
+      }
+
+      // Set the message and navigate to Home page
+      setMessage(message || "Uploaded Successfully");
       navigate("/Home");
     } catch (error) {
+      // Handle any errors that occur during the file upload
       console.error("Error:", error.response?.data || error.message);
       setMessage("An error occurred while uploading the file.");
     }
@@ -63,7 +77,7 @@ const Create = () => {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              />
+            />
             <textarea
               name="content"
               className="block w-full px-3 py-2 resize-none bg-zinc-200 rounded-md min-h-[200px] mb-5"
@@ -72,9 +86,9 @@ const Create = () => {
               onChange={(e) => setContent(e.target.value)}
             ></textarea>
 
-            {/* Square Layout */}
+            {/* Square Layout for encryption, shareable, and passcode */}
             <div className="grid grid-cols-2 grid-rows-2 gap-4 items-center mb-6">
-              {/* Encryption */}
+              {/* Encryption Checkbox */}
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -85,7 +99,7 @@ const Create = () => {
                 <label>Encryption</label>
               </div>
 
-              {/* Shareable */}
+              {/* Shareable Checkbox */}
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -104,7 +118,7 @@ const Create = () => {
               />
             </div>
 
-            {/* Passcode Input */}
+            {/* Passcode Input (only shown if encryption is enabled) */}
             {encryption && (
               <input
                 type="password"

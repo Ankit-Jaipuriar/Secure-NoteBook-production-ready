@@ -2,23 +2,21 @@ import { useTheme } from "../context/ThemeContext";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { 
   RiLockLine, 
   RiCheckLine, 
   RiMenuLine, 
   RiCloseLine, 
   RiDeleteBin6Line, 
-  RiShareLine 
+  RiShareLine, 
+  RiShareForwardLine 
 } from "react-icons/ri";
+import { use } from "react";
 
 const HomePage = () => {
   const { isDark, toggleTheme } = useTheme();
   const [files, setFiles] = useState([]);
   const [sortedFiles, setSortedFiles] = useState([]);
-  const [filterByDate, setFilterByDate] = useState("newest");
-  const [selectedDate, setSelectedDate] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [passcode, setPasscode] = useState("");
@@ -28,6 +26,7 @@ const HomePage = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [sharedFiles, setSharedFiles] = useState([]);
   const navigate = useNavigate();
 
   // Fetch files on page load
@@ -43,6 +42,36 @@ const HomePage = () => {
         navigate("/login");
       });
   }, [navigate]);
+
+
+  useEffect(() => {
+    // fetch the sahred files
+    const fetchSharedFiles = async () => {
+      try {
+        const response = await axios.get("/api/shared-files");
+        setSharedFiles(response.data);
+      }catch (error) {
+        console.error("Error fetching shared files:", error);
+      }
+    };
+    fetchSharedFiles();
+  }, []);
+
+
+  // Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await axios.get("/api/current-user", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -76,7 +105,7 @@ const HomePage = () => {
       });
       if (response.data.success) {
         setShowPopup(false);
-        navigate(`/view/${fileId}`)
+        navigate(`/view/${fileId}`);
       } else {
         setErrorMessage("Wrong passcode. Please try again.");
       }
@@ -95,33 +124,27 @@ const HomePage = () => {
   };
 
   const handleShareFile = async () => {
+    if (!selectedUser) {
+      alert("Please select a user to share with.");
+      return;
+    }
     try {
-      await axios.post("/api/shareFile", {
-        fileId,
-        userId: selectedUser,
-      });
-      setShowSharePopup(false);
+      const response = await axios.post(
+        "/api/shareFile", 
+        { fileId, email: selectedUser }, 
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        alert("File shared successfully!");
+        setShowSharePopup(false);
+      } else {
+        alert("Failed to share file. Try again.");
+      }
     } catch (error) {
       console.error("Error sharing file:", error);
+      alert("Error occurred while sharing the file.");
     }
   };
-
-
-    // Fetch the current user
-    useEffect(() => {
-      const fetchCurrentUser = async () => {
-        try {
-          const response = await axios.get("/api/current-user", {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
-          setCurrentUser(response.data); // Set the current user
-        } catch (error) {
-          console.error("Error fetching current user:", error);
-        }
-      };
-  
-      fetchCurrentUser();
-    }, []);
 
   return (
     <main
@@ -167,6 +190,73 @@ const HomePage = () => {
           </button>
         </div>
       </nav>
+
+      <div className="p-4 sm:p-6">
+  {/* Header Section */}
+  <div className="border-b-4 border-yellow-500 mb-6">
+    <h1 className="text-2xl sm:text-3xl font-bold text-yellow-600 pb-2">Shared Files</h1>
+  </div>
+
+  {/* Shared Files Content */}
+  {sharedFiles.length === 0 ? (
+    <p className="text-gray-500 text-center text-sm sm:text-lg">
+      No shared files available.
+    </p>
+  ) : (
+    <div className="bg-gray-100 rounded-lg shadow-md">
+      {/* Scrollable List Container */}
+      <ul
+        className="divide-y divide-gray-300 overflow-y-auto"
+        style={{ maxHeight: "200px" }} // Adjust height to fit 3 rows
+      >
+        {sharedFiles.map((file) => {
+          const remainingTime = (expiry) => {
+            const diff = new Date(expiry) - new Date();
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m remaining`;
+          };
+
+          return (
+            <li
+              key={file._id}
+              className="flex items-center justify-between p-4 hover:bg-gray-200 transition-colors duration-300"
+            >
+              {/* File Name */}
+              <span className="flex-grow text-black text-sm sm:text-lg font-semibold">
+                {file.fileName}
+              </span>
+
+              {/* Date and Expiry */}
+              <span className="text-gray-500 text-xs sm:text-sm text-center flex-none w-40">
+                {file.createdAt}
+                {file.expiry && (
+                  <div className="text-red-500 text-xs">
+                    Expires in {remainingTime(file.expiry)}
+                  </div>
+                )}
+              </span>
+
+              {/* Actions */}
+              <div className="flex space-x-4 flex-none">
+                <button
+                  onClick={() => navigate(`/view/${file._id}`)}
+                  className="text-blue-500 hover:underline hover:scale-105 transition-transform duration-300 text-sm sm:text-lg"
+                >
+                  View
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
+</div>
+
+
+
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {sortedFiles.length > 0 ? (
@@ -244,7 +334,7 @@ const HomePage = () => {
         {users
           .filter((user) => user._id !== currentUser._id) // Exclude the current user
           .map((user) => (
-            <option key={user._id} value={user._id}>
+            <option key={user._id} value={user.email}>
               {user.email}
             </option>
           ))}

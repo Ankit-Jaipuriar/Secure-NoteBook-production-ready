@@ -38,7 +38,8 @@ const fileSchema = mongoose.Schema({
   },
   updatedAt: {
     type: String, // Change type to String to store formatted date
-  }
+  },
+  sharedWith: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
 });
 
 // Pre-save hook to format dates

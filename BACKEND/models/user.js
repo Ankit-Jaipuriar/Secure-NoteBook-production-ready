@@ -9,7 +9,13 @@ const userSchema = mongoose.Schema({
         required: true,
         match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
     },
-    password: String
+    password: String,
+        // Array to store file IDs that are shared with this user
+        sharedFiles: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "file" // Assuming the 'file' model exists
+        }]
+    
 })
 
 module.exports = mongoose.model("user",userSchema);
