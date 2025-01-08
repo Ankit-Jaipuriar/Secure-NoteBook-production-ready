@@ -8,7 +8,7 @@ import Register from './components/Register';
 import ViewNote from './components/viewNote'; 
 import { useEffect } from 'react'; 
 import EditNote from './components/EditNote';
-import SharedviewNote from './components/viewSharedNote.jsx';
+import SharedviewNote from './components/viewSharedNote';
 
 function App() {
   const { isDark } = useTheme(); // Use theme context

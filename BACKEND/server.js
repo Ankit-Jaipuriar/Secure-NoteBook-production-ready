@@ -343,7 +343,7 @@ app.get('/api/shared-files', authenticate, async (req, res) => {
       return {
         ...file.toObject(),
         expiry: sharedFile ? sharedFile.expiry : null, // Add expiry time if exists
-        email: user.email // Include the email of the user who shared the file
+        email: sharedFile.email // Include the email of the user who shared the file
       };
     });
 
