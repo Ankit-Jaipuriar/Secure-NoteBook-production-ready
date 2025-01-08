@@ -19,7 +19,7 @@ const fileSchema = mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "user",
     required: true,
   },
   encryption: {
@@ -39,7 +39,7 @@ const fileSchema = mongoose.Schema({
   updatedAt: {
     type: String, // Change type to String to store formatted date
   },
-  sharedWith: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+  sharedWith: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
 });
 
 // Pre-save hook to format dates

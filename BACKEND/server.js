@@ -286,9 +286,14 @@ app.post('/api/shareFile', async (req, res) => {
       await file.save();
     }
 
-    // Add the fileId to the user's sharedFiles array if not already present
-    if (!user.sharedFiles.includes(fileId)) {
-      user.sharedFiles.push(fileId);
+    // Check if the file is already in the user's sharedFiles array
+    const fileAlreadyShared = user.sharedFiles.some(
+      (sharedFile) => sharedFile.fileId.toString() === fileId.toString()
+    );
+
+    // Add the file to sharedFiles if not already present
+    if (!fileAlreadyShared) {
+      user.sharedFiles.push({ fileId }); // Only add fileId here
       await user.save();
     }
 
@@ -304,18 +309,34 @@ app.post('/api/shareFile', async (req, res) => {
 app.get('/api/shared-files', authenticate, async (req, res) => {
   try {
     // Fetch the authenticated user by userId (ensure userId is part of req.userId)
-    const user = await userModel.findById(req.userId).populate('sharedFiles');
+    const user = await userModel.findById(req.userId);
 
     // If the user is not found or there are no shared files
     if (!user || !user.sharedFiles || user.sharedFiles.length === 0) {
       return res.status(200).json([]);
     }
 
-    // Send the shared files with encryption status
-    const filesWithStatus = user.sharedFiles.map(file => ({
-      ...file.toObject(),
-      // encrypted: file.encryption || false, // Default to false if encryption field is missing
-    }));
+    // Extract all fileIds from the sharedFiles array
+    const fileIds = user.sharedFiles.map((sharedFile) => sharedFile.fileId);
+
+    // Find all files with matching IDs
+    const files = await userFile.find({ _id: { $in: fileIds } });
+
+    // If no files are found
+    if (!files || files.length === 0) {
+      return res.status(404).json({ message: "No shared files found" });
+    }
+
+    // Map over the files and include expiry time
+    const filesWithStatus = files.map((file) => {
+      const sharedFile = user.sharedFiles.find(
+        (shared) => shared.fileId.toString() === file._id.toString()
+      );
+      return {
+        ...file.toObject(),
+        expiry: sharedFile ? sharedFile.expiry : null, // Add expiry time if exists
+      };
+    });
 
     res.status(200).json(filesWithStatus);
   } catch (error) {
@@ -323,6 +344,7 @@ app.get('/api/shared-files', authenticate, async (req, res) => {
     res.status(500).json({ error: "Error fetching shared files" });
   }
 });
+
 
 
 app.delete('/api/files/:fileId', async (req, res) => {
