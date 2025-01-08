@@ -2,6 +2,7 @@ import { useTheme } from "../context/ThemeContext";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import secureIcon from '../images/secure.png';
 import { 
   RiLockLine, 
   RiCheckLine, 
@@ -27,6 +28,8 @@ const HomePage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [sharedFiles, setSharedFiles] = useState([]);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteFileId, setDeleteFileId] = useState(null);
   const navigate = useNavigate();
 
   // Fetch files on page load
@@ -87,11 +90,17 @@ const HomePage = () => {
     }
   };
 
+  const handleDeleteFileConfirmation = (fileId) => {
+    setDeleteFileId(fileId); // Store the fileId for the file to be deleted
+    setShowDeletePopup(true); // Show the confirmation pop-up
+  };
+
   const deleteFile = async (fileId) => {
     try {
       await axios.delete(`/api/files/${fileId}`, { withCredentials: true });
       setFiles(files.filter(file => file._id !== fileId));
       setSortedFiles(sortedFiles.filter(file => file._id !== fileId));
+      setShowDeletePopup(false)
     } catch (error) {
       console.error("Error deleting file:", error);
     }
@@ -151,7 +160,11 @@ const HomePage = () => {
       className={`w-full min-h-screen ${isDark ? "bg-gray-800 text-white" : "bg-white text-black"} font-['Helvetica'] p-4 sm:p-6 overflow-y-auto`}
     >
       <nav className="flex justify-between py-2 sm:py-4 items-center sm:px-6 px-4 relative">
-        <h3 className="text-xl sm:text-2xl font-semibold tracking-tight">Secure-NoteBook</h3>
+      <div className="flex items-center space-x-2">
+  <img src={secureIcon} alt="icon" className="h-6 w-6" />
+  <h3 className="text-xl sm:text-xl font-semibold tracking-tight">Secure-NoteBook</h3>
+</div>
+
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="text-xl sm:text-2xl sm:hidden hover:scale-110 transition-transform duration-300"
@@ -194,7 +207,7 @@ const HomePage = () => {
       <div className="p-4 sm:p-6">
   {/* Header Section */}
   <div className="border-b-4 border-yellow-500 mb-6">
-    <h1 className="text-2xl sm:text-3xl font-bold text-yellow-600 pb-2">Shared Files</h1>
+    <h1 className="text-2xl sm:text-xl text-grey-300 pb-2">Shared Files</h1>
   </div>
 
   {/* Shared Files Content */}
@@ -251,7 +264,7 @@ const HomePage = () => {
 
                 {/* View Button */}
                 <button
-                  onClick={() => navigate(`/view/${file._id}`)}
+                  onClick={() => navigate(`/sharedView/${file._id}`)}
                   className="text-blue-500 hover:underline hover:scale-105 transition-transform duration-300 text-sm sm:text-lg"
                 >
                   View
@@ -278,7 +291,7 @@ const HomePage = () => {
           sortedFiles.map((file) => (
             <div key={file._id} className="bg-gray-100 text-black p-4 sm:p-6 rounded-lg shadow-md hover:bg-gray-400 hover:shadow-lg hover:scale-105 transition-all duration-300 transform w-full relative">
               <button
-                onClick={() => deleteFile(file._id)}
+                onClick={() => handleDeleteFileConfirmation(file._id)}
                 className="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:scale-110 transition-transform duration-300"
               >
                 <RiDeleteBin6Line className="text-xl" />
@@ -403,6 +416,32 @@ const HomePage = () => {
         </div>
       </div>
     )}
+
+    {/* Delete Confirmation Pop-up */}
+{showDeletePopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+      <h2 className="text-lg font-semibold mb-4 text-black">Are you sure you want to delete this file?</h2>
+      <div className="flex justify-between">
+        <button
+          onClick={() => {
+            deleteFile(deleteFileId); // Proceed with file deletion
+          }}
+          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => setShowDeletePopup(false)} // Close the pop-up without deleting
+          className="ml-2 bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+        >
+          No
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </main>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-const ViewNote = () => {
+const viewSharedNote = () => {
   const { fileId } = useParams();
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,12 +82,6 @@ const ViewNote = () => {
             >
               Back
             </Link>
-            <Link
-              to={`/edit/${fileId}`}
-              className="px-5 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-            >
-              Edit
-            </Link>
           </div>
         </div>
       </div>
@@ -95,4 +89,4 @@ const ViewNote = () => {
   );
 };
 
-export default ViewNote;
+export default viewSharedNote;

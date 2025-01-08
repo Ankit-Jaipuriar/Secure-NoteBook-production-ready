@@ -293,7 +293,7 @@ app.post('/api/shareFile', async (req, res) => {
     if (!fileAlreadyShared) {
       // Add the file to sharedFiles with additional information
       const currentTime = new Date();
-      const expiryTime = new Date(currentTime.getTime() +10 * 1000); // 24 hours from now
+      const expiryTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
 
       user.sharedFiles.push({
         fileId,
@@ -379,24 +379,70 @@ const cleanExpiredSharedFiles = async () => {
         await user.save();
       }
     }
-
-    console.log("Expired files cleaned up successfully.");
   } catch (error) {
     console.error("Error cleaning expired files:", error);
   }
 };
 
-// Set interval for cleanup (e.g., every hour)
-const interval = 100; // 1 hour in milliseconds
+const interval = 100; 
 setInterval(() => {
-  console.log("Running expired files cleanup...");
   cleanExpiredSharedFiles(); // Call cleanup function
 }, interval);
 
 // Optionally, you can call cleanExpiredSharedFiles once immediately when the app starts.
 cleanExpiredSharedFiles();
 
+app.get('/api/notes/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const note = await userFile.findById(fileId);
 
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    // Remove the passcode field if encryption is enabled
+    const responseNote = { ...note._doc };
+    if (note.encryption) {
+      delete responseNote.passcode;
+    }
+
+    res.json(responseNote);
+  } catch (error) {
+    console.error("Error fetching note:", error);
+    res.status(500).json({ message: "An error occurred while fetching the note" });
+  }
+});
+
+
+// Update a specific note by ID
+app.put('/api/notes/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { fileName, content, encryption, shareable, passcode } = req.body;
+
+      // If encryption is enabled, hash the passcode
+      let passcodeHash = "";
+      if (encryption && passcode) {
+        passcodeHash = await hashPasscode(passcode); // Use await for asynchronous hashing
+      }
+
+    const updatedNote = await userFile.findByIdAndUpdate(
+      fileId,
+      { fileName, content, encryption, shareable, passcode: passcodeHash }, // Update the fields
+      { new: true } // Return the updated note
+    );
+
+    if (!updatedNote) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    res.json({ message: "Note updated successfully", note: updatedNote });
+  } catch (error) {
+    console.error("Error updating note:", error);
+    res.status(500).json({ message: "An error occurred while updating the note" });
+  }
+});
 
 
 

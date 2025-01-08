@@ -5,8 +5,10 @@ import HomePage from './components/HomePage';
 import Create from './components/Create'; 
 import Login from './components/Login';
 import Register from './components/Register';
-import ViewNote from './components/viewNote'; // Corrected import
+import ViewNote from './components/viewNote'; 
 import { useEffect } from 'react'; 
+import EditNote from './components/EditNote';
+import SharedviewNote from './components/viewSharedNote.jsx';
 
 function App() {
   const { isDark } = useTheme(); // Use theme context
@@ -24,6 +26,8 @@ function App() {
         <Route path="/login" element={<Login />} /> {/* Login page route */}
         <Route path="/Home" element={<HomePage />} /> {/* Home page route */}
         <Route path="/view/:fileId" element={<ViewNote />} /> {/* ViewNote page route */}
+        <Route path="/edit/:fileId" element={<EditNote />} /> 
+        <Route path="/sharedView/:fileId" element={<SharedviewNote />} /> 
       </Routes>
     </Router>
   );
