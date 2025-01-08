@@ -263,7 +263,6 @@ app.get("/api/users", authenticate, async (req, res) => {
   }
 });
 
-// Share file route
 app.post('/api/shareFile', async (req, res) => {
   const { fileId, email } = req.body;
 
@@ -291,9 +290,17 @@ app.post('/api/shareFile', async (req, res) => {
       (sharedFile) => sharedFile.fileId.toString() === fileId.toString()
     );
 
-    // Add the file to sharedFiles if not already present
     if (!fileAlreadyShared) {
-      user.sharedFiles.push({ fileId }); // Only add fileId here
+      // Add the file to sharedFiles with additional information
+      const currentTime = new Date();
+      const expiryTime = new Date(currentTime.getTime() +10 * 1000); // 24 hours from now
+
+      user.sharedFiles.push({
+        fileId,
+        email,
+        expiry: expiryTime,
+      });
+
       await user.save();
     }
 
@@ -303,6 +310,7 @@ app.post('/api/shareFile', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 // Route to fetch shared files for the authenticated user
@@ -335,6 +343,7 @@ app.get('/api/shared-files', authenticate, async (req, res) => {
       return {
         ...file.toObject(),
         expiry: sharedFile ? sharedFile.expiry : null, // Add expiry time if exists
+        email: user.email // Include the email of the user who shared the file
       };
     });
 
@@ -344,6 +353,50 @@ app.get('/api/shared-files', authenticate, async (req, res) => {
     res.status(500).json({ error: "Error fetching shared files" });
   }
 });
+
+// Function to clean expired shared files
+const cleanExpiredSharedFiles = async () => {
+  try {
+    const users = await userModel.find(); // Get all users
+
+    for (let user of users) {
+      const currentTime = new Date();
+      
+      // Create a new array by filtering out expired files
+      const updatedSharedFiles = user.sharedFiles.filter(sharedFile => {
+        // Ensure expiry is a Date object and compare it with current time
+        return new Date(sharedFile.expiry) > currentTime;
+      });
+
+      // Check if the sharedFiles array was modified (i.e., if files were expired and removed)
+      if (updatedSharedFiles.length !== user.sharedFiles.length) {
+        console.log(`User ${user.email}: Expired files removed.`); // Log the cleanup
+        
+        // Replace the old sharedFiles with the updated one (without expired files)
+        user.sharedFiles = updatedSharedFiles;
+
+        // Mark the document as modified to ensure mongoose saves it
+        await user.save();
+      }
+    }
+
+    console.log("Expired files cleaned up successfully.");
+  } catch (error) {
+    console.error("Error cleaning expired files:", error);
+  }
+};
+
+// Set interval for cleanup (e.g., every hour)
+const interval = 100; // 1 hour in milliseconds
+setInterval(() => {
+  console.log("Running expired files cleanup...");
+  cleanExpiredSharedFiles(); // Call cleanup function
+}, interval);
+
+// Optionally, you can call cleanExpiredSharedFiles once immediately when the app starts.
+cleanExpiredSharedFiles();
+
+
 
 
 

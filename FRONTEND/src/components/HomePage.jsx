@@ -212,9 +212,14 @@ const HomePage = () => {
         {sharedFiles.map((file) => {
           const remainingTime = (expiry) => {
             const diff = new Date(expiry) - new Date();
+            if (diff <= 0) return "Expired";
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            return `${hours}h ${minutes}m remaining`;
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            if (hours > 0) return `${hours}h ${minutes}m remaining`;
+            if (minutes > 0) return `${minutes}m ${seconds}s remaining`;
+            return `${seconds}s remaining`;
           };
 
           return (
@@ -222,23 +227,29 @@ const HomePage = () => {
               key={file._id}
               className="flex items-center justify-between p-4 hover:bg-gray-200 transition-colors duration-300"
             >
-              {/* File Name */}
-              <span className="flex-grow text-black text-sm sm:text-lg font-semibold">
-                {file.fileName}
-              </span>
+              {/* File Details */}
+              <div className="flex items-center space-x-4 flex-grow">
+                {/* File Name */}
+                <span className="text-black text-sm sm:text-lg font-semibold">
+                  {file.fileName}
+                </span>
 
-              {/* Date and Expiry */}
-              <span className="text-gray-500 text-xs sm:text-sm text-center flex-none w-40">
-                {file.createdAt}
+                {/* Sender Email */}
+                <span className="text-gray-500 text-xs sm:text-sm">
+                  Sent by: <span className="text-blue-500">{file.email}</span>
+                </span>
+              </div>
+
+              {/* Expiry and Actions */}
+              <div className="flex items-center space-x-4 flex-none">
+                {/* Remaining Time */}
                 {file.expiry && (
-                  <div className="text-red-500 text-xs">
-                    Expires in {remainingTime(file.expiry)}
-                  </div>
+                  <span className="text-red-500 text-xs sm:text-sm">
+                    {remainingTime(file.expiry)}
+                  </span>
                 )}
-              </span>
 
-              {/* Actions */}
-              <div className="flex space-x-4 flex-none">
+                {/* View Button */}
                 <button
                   onClick={() => navigate(`/view/${file._id}`)}
                   className="text-blue-500 hover:underline hover:scale-105 transition-transform duration-300 text-sm sm:text-lg"
@@ -252,7 +263,11 @@ const HomePage = () => {
       </ul>
     </div>
   )}
+
+  {/* Horizontal Line Separator */}
+  <hr className="mt-6 border-t-2 border-gray-300" />
 </div>
+
 
 
 
