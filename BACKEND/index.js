@@ -1,25 +1,56 @@
-const express = require("express");
+import express from "express";
+import path from "path";
+import cors from "cors";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
+import userModel from "./models/user.js";
+import userFile from "./models/file.js";
+import authenticate from './middleware/authenticate.js';
+import dotenv from 'dotenv';
+import mongoose from "mongoose";
+
 const app = express();
-const path = require("path");
-const cors = require("cors");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
-const userModel = require("./models/user");
-const userFile = require("./models/file")
-const authenticate = require('./middleware/authenticate');
+
+dotenv.config();
+
+
+const _dirname = path.resolve();
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configure CORS
-app.use(
-  cors({
-    origin: "http://localhost:5000", // Frontend origin
-    credentials: true, // Allow cookies to be sent
-  })
-);
+
+
+// MongoDB connection
+const connectDB = async () => {
+  try {
+    // Replace with your MongoDB URI from your environment variable or .env file
+    const dbURI = process.env.MONGO_URI ;
+    
+    // Connecting to MongoDB
+    await mongoose.connect(dbURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    
+    console.log("MongoDB connected successfully!");
+  } catch (error) {
+    console.error("MongoDB connection failed:", error);
+    process.exit(1); // Exit the process if the connection fails
+  }
+};
+
+// Call the function to connect to MongoDB
+connectDB();
+
+
+const corsOptions = {
+  origin:"http://localhost:5173",
+  credentials:true
+}
+app.use(cors(corsOptions));
 
 // Middleware for cookies
 app.use(cookieParser());
@@ -264,7 +295,7 @@ app.get("/api/users", authenticate, async (req, res) => {
 });
 
 app.post('/api/shareFile', async (req, res) => {
-  const { fileId, email } = req.body;
+  const { fileId, email, senderEmail } = req.body; // Add senderEmail to destructuring
 
   try {
     // Find the user by email
@@ -297,7 +328,7 @@ app.post('/api/shareFile', async (req, res) => {
 
       user.sharedFiles.push({
         fileId,
-        email,
+        email: senderEmail, // Store senderEmail here
         expiry: expiryTime,
       });
 
@@ -476,15 +507,11 @@ app.get('/api/current-user', authenticate, async (req, res) => {
   }
 });
 
-// Serve static files from React build
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-// Serve React app for all routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+app.use(express.static(path.join(_dirname, "/FRONTEND/dist")));
+app.get('*', (_,res) => {
+    res.sendFile(path.resolve(_dirname, "FRONTEND", "dist", "index.html"));
 });
-
 // Start the server
-app.listen(5000, () => {
+app.listen(process.env.PORT, () => {
   console.log("Backend server running on port 5000");
 });

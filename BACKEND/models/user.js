@@ -1,6 +1,9 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-mongoose.connect('mongodb://127.0.0.1:27017/secureNote');
+dotenv.config();
+
+mongoose.connect(process.env.MONGO_URI);
 
 // Subschema for shared files
 const sharedFileSchema = mongoose.Schema({
@@ -28,4 +31,4 @@ const userSchema = mongoose.Schema({
   sharedFiles: [sharedFileSchema] // Use the sharedFileSchema here
 });
 
-module.exports = mongoose.model("user", userSchema);
+export default mongoose.model("user", userSchema);

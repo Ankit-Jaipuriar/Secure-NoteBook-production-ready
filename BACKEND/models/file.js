@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // Utility function to format date as dd-mm-yyyy
 const formatDate = (date) => {
@@ -50,4 +50,4 @@ fileSchema.pre("save", function (next) {
   next();
 });
 
-module.exports = mongoose.model("file", fileSchema);
+export default mongoose.model("file", fileSchema);

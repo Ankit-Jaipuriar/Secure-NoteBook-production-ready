@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const userModel = require('../models/user'); // Adjust the path as necessary
+import jwt from 'jsonwebtoken';
+import userModel from '../models/user.js'; // Adjust the path as necessary
 
 const authenticate = async (req, res, next) => {
   const token = req.cookies.token; // Retrieve the token from the cookie
@@ -24,4 +24,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = authenticate;
+export default authenticate;

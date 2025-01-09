@@ -140,7 +140,7 @@ const HomePage = () => {
     try {
       const response = await axios.post(
         "/api/shareFile", 
-        { fileId, email: selectedUser }, 
+        { fileId, email: selectedUser, senderEmail: currentUser?.email }, 
         { withCredentials: true }
       );
       if (response.data.success) {
