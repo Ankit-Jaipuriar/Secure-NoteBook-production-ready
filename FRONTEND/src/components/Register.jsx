@@ -11,7 +11,7 @@ const Register = () => {
 
     try {
       // Send a POST request to the backend
-      const response = await axios.post("/api/register", { email, password });
+      const response = await axios.post("https://secure-notebook-production-ready.onrender.com/api/register", { email, password });
       setMessage("Account created successfully!");
       console.log("Response from server:", response.data); // Log server response
     } catch (error) {

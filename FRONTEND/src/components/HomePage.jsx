@@ -35,7 +35,7 @@ const HomePage = () => {
   // Fetch files on page load
   useEffect(() => {
     axios
-      .get("/api/files", { withCredentials: true })
+      .get("https://secure-notebook-production-ready.onrender.com/api/files", { withCredentials: true })
       .then((response) => {
         setFiles(response.data);
         setSortedFiles(response.data);
@@ -51,7 +51,7 @@ const HomePage = () => {
     // fetch the sahred files
     const fetchSharedFiles = async () => {
       try {
-        const response = await axios.get("/api/shared-files");
+        const response = await axios.get("https://secure-notebook-production-ready.onrender.com/api/shared-files");
         setSharedFiles(response.data);
       }catch (error) {
         console.error("Error fetching shared files:", error);
@@ -65,7 +65,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await axios.get("/api/current-user", {
+        const response = await axios.get("https://secure-notebook-production-ready.onrender.com/api/current-user", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setCurrentUser(response.data);
@@ -79,7 +79,7 @@ const HomePage = () => {
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get("/api/logout", { withCredentials: true });
+      const response = await axios.get("https://secure-notebook-production-ready.onrender.com/api/logout", { withCredentials: true });
       if (response.data === "Logged out") {
         navigate("/login");
       } else {
@@ -97,7 +97,7 @@ const HomePage = () => {
 
   const deleteFile = async (fileId) => {
     try {
-      await axios.delete(`/api/files/${fileId}`, { withCredentials: true });
+      await axios.delete(`https://secure-notebook-production-ready.onrender.com/api/files/${fileId}`, { withCredentials: true });
       setFiles(files.filter(file => file._id !== fileId));
       setSortedFiles(sortedFiles.filter(file => file._id !== fileId));
       setShowDeletePopup(false)
@@ -108,7 +108,7 @@ const HomePage = () => {
 
   const handleVerifyPasscode = async () => {
     try {
-      const response = await axios.post("/api/verifyPasscode", {
+      const response = await axios.post("https://secure-notebook-production-ready.onrender.com/api/verifyPasscode", {
         fileId,
         passcode,
       });
@@ -125,7 +125,7 @@ const HomePage = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("/api/users", { withCredentials: true });
+      const response = await axios.get("https://secure-notebook-production-ready.onrender.com/api/users", { withCredentials: true });
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -139,7 +139,7 @@ const HomePage = () => {
     }
     try {
       const response = await axios.post(
-        "/api/shareFile", 
+        "https://secure-notebook-production-ready.onrender.com/api/shareFile", 
         { fileId, email: selectedUser, senderEmail: currentUser?.email }, 
         { withCredentials: true }
       );

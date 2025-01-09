@@ -19,7 +19,7 @@ const Edit = () => {
   useEffect(() => {
     const fetchNote = async () => {
       try {
-        const response = await axios.get(`/api/notes/${fileId}`);
+        const response = await axios.get(`https://secure-notebook-production-ready.onrender.com/api/notes/${fileId}`);
         const { fileName, content, encryption, shareable, passcode } = response.data;
 
         // Set the state with the fetched data
@@ -56,7 +56,7 @@ const Edit = () => {
 
     try {
       // Send updated file data to backend
-      const response = await axios.put(`/api/notes/${fileId}`, updatedFileData);
+      const response = await axios.put(`https://secure-notebook-production-ready.onrender.com/api/notes/${fileId}`, updatedFileData);
 
       const { message } = response.data;
       setMessage(message || "Updated Successfully");
