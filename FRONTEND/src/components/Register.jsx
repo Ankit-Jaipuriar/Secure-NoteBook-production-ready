@@ -64,6 +64,9 @@ const Register = () => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   required
                 />
+                  <p className="mt-1 text-sm text-gray-600 dark:text-yellow-400">
+                    Password must be at least 6 characters long.
+               </p>
               </div>
               <div className="flex items-start">
                 <div className="flex items-center h-5">
@@ -97,7 +100,7 @@ const Register = () => {
                 Create an account
               </button>
               {message && (
-                <p className="text-sm font-light text-green-300 dark:text-gray-400 mt-4">
+                <p className="text-sm font-bold text-green-300 dark:text-green-400 mt-4">
                   {message}
                 </p>
               )}

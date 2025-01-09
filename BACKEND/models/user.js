@@ -27,7 +27,11 @@ const userSchema = mongoose.Schema({
     required: true,
     match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
   },
-  password: String,
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
   sharedFiles: [sharedFileSchema] // Use the sharedFileSchema here
 });
 
