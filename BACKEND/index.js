@@ -47,7 +47,7 @@ connectDB();
 
 
 const corsOptions = {
-  origin:"http://localhost:5173",
+  origin:"https://secure-notebook-production-ready.onrender.com",
   credentials:true
 }
 app.use(cors(corsOptions));
@@ -114,7 +114,6 @@ app.post("/api/login", async (req, res) => {
     }
   });
 });
-
 
 // Example of verifying the token on the backend
 app.get('/api/verify-token', (req, res) => {
