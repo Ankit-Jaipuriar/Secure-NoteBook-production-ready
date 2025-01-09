@@ -26,6 +26,7 @@
     "mongodb": "^6.12.0",
     "mongoose": "^8.9.3",
     "node-cron": "^3.0.3",
-    "nodemon": "^3.1.2"
+    "nodemon": "^3.1.2",
+    "whatwg-url": "^14.1.0"
   }
 }
