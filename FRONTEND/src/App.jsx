@@ -20,20 +20,16 @@ function App() {
 
   return (
     <Router>
-    <Routes>
-      {/* Redirect the root path "/" to the Home page */}
-      <Route path="/" element={<Navigate to="/Home" replace />} />
-      
-      {/* Define other routes */}
-      <Route path="/register" element={<Register />} /> {/* Register page route */}
-      <Route path="/create" element={<Create />} /> {/* Create page route */}
-      <Route path="/login" element={<Login />} /> {/* Login page route */}
-      <Route path="/Home" element={<HomePage />} /> {/* Home page route */}
-      <Route path="/view/:fileId" element={<ViewNote />} /> {/* ViewNote page route */}
-      <Route path="/edit/:fileId" element={<EditNote />} /> 
-      <Route path="/sharedView/:fileId" element={<SharedviewNote />} /> 
-    </Routes>
-  </Router>
+      <Routes>
+        <Route path="/" element={<Register/>} /> {/* Register page route */}
+        <Route path="/create" element={<Create />} /> {/* Create page route */}
+        <Route path="/login" element={<Login />} /> {/* Login page route */}
+        <Route path="/Home" element={<HomePage />} /> {/* Home page route */}
+        <Route path="/view/:fileId" element={<ViewNote />} /> {/* ViewNote page route */}
+        <Route path="/edit/:fileId" element={<EditNote />} /> 
+        <Route path="/sharedView/:fileId" element={<SharedviewNote />} /> 
+      </Routes>
+    </Router>
   );
 }
 

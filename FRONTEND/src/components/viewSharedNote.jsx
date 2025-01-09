@@ -9,7 +9,7 @@ const viewSharedNote = () => {
   useEffect(() => {
     const fetchFileData = async () => {
       try {
-        const response = await fetch(`https://secure-notebook-production-ready.onrender.com/api/files/${fileId}`);
+        const response = await fetch(`/api/files/${fileId}`);
         const data = await response.json();
         setFileData(data);
         setLoading(false);

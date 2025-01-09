@@ -34,7 +34,7 @@ const Create = () => {
 
     try {
       // Send file data to backend
-      const response = await axios.post("https://secure-notebook-production-ready.onrender.com/api/upload", fileData);
+      const response = await axios.post("/api/upload", fileData);
 
       // Capture the fileId and message from the response
       const { fileId, message } = response.data;

@@ -47,7 +47,7 @@ connectDB();
 
 
 const corsOptions = {
-  origin:"https://secure-notebook-production-ready.onrender.com",
+  origin:"http://localhost:5173",
   credentials:true
 }
 app.use(cors(corsOptions));

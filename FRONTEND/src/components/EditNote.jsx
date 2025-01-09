@@ -56,7 +56,7 @@ const Edit = () => {
 
     try {
       // Send updated file data to backend
-      const response = await axios.put(`https://secure-notebook-production-ready.onrender.com/api/notes/${fileId}`, updatedFileData);
+      const response = await axios.put(`/api/notes/${fileId}`, updatedFileData);
 
       const { message } = response.data;
       setMessage(message || "Updated Successfully");
