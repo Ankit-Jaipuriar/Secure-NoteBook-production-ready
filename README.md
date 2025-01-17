@@ -60,10 +60,6 @@ Secure Notebook is a full-stack web application designed for secure note-taking 
 - Create, lock, and share notes securely.
 - View shared notes with automatic expiration after 24 hours.
 
-## Visual Preview
-
-_Add screenshots here to showcase your application's interface and features._
-
 ## Future Enhancements
 
 - Two-factor authentication (2FA) for added security.
